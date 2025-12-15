@@ -70,33 +70,57 @@ GO
 
 /* =========================
    Uppgift 5
-   NewUsers: alla kolumner (förutom att FirstName+LastName blir Name)
-   + Gender baserat på näst sista siffran i personnumret
+   Ta ut samtliga rader och kolumner från Users,
+   slå ihop FirstName + LastName till Name,
+   och lägg till kolumn Gender
    ========================= */
+
 IF OBJECT_ID('dbo.NewUsers', 'U') IS NOT NULL
     DROP TABLE dbo.NewUsers;
 
-SELECT
-    u.[ID],
-    CAST(u.[UserName] AS nvarchar(8)) AS [UserName],
-    u.[Password],
-    u.[Email],
-    u.[Phone],
-    CONCAT(u.[FirstName], ' ', u.[LastName]) AS [Name],
-    CASE
-        WHEN TRY_CONVERT(int,
-             SUBSTRING(
-                REPLACE(REPLACE(u.[ID], '-', ''), '+', ''),
-                LEN(REPLACE(REPLACE(u.[ID], '-', ''), '+', '')) - 1,
-                1
-             )
-        ) % 2 = 0 THEN 'Female'
-        ELSE 'Male'
-    END AS [Gender]
+-- 1. Kopiera ALLA kolumner och rader
+SELECT *
 INTO dbo.NewUsers
-FROM dbo.[Users] AS u;
+FROM dbo.[Users];
 
 GO
+
+-- 2. Lägg till kolumn Name
+ALTER TABLE dbo.NewUsers
+ADD [Name] nvarchar(200);
+
+GO
+
+-- 3. Lägg till kolumn Gender
+ALTER TABLE dbo.NewUsers
+ADD [Gender] nvarchar(10);
+
+GO
+
+-- 4. Sätt Name = FirstName + LastName
+UPDATE dbo.NewUsers
+SET [Name] = CONCAT([FirstName], ' ', [LastName]);
+
+GO
+
+-- 5. Beräkna Gender från näst sista siffran i personnumret
+UPDATE dbo.NewUsers
+SET [Gender] =
+    CASE
+        WHEN TRY_CONVERT(
+            int,
+            SUBSTRING(
+                REPLACE(REPLACE([ID], '-', ''), '+', ''),
+                LEN(REPLACE(REPLACE([ID], '-', ''), '+', '')) - 1,
+                1
+            )
+        ) % 2 = 0
+        THEN 'Female'
+        ELSE 'Male'
+    END;
+
+GO
+
 
 
 
