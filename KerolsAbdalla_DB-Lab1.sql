@@ -78,7 +78,7 @@ IF OBJECT_ID('dbo.NewUsers', 'U') IS NOT NULL
 
 SELECT
     u.[ID],
-    CAST(u.[UserName] AS nvarchar(6)) AS [UserName],
+    CAST(u.[UserName] AS nvarchar(8)) AS [UserName],
     u.[Password],
     u.[Email],
     u.[Phone],
@@ -118,9 +118,9 @@ GO
 
 /* =========================
    Uppgift 7
-   Gör alla UserName unika (utan att överskrida nvarchar(6))
+   Gör alla UserName unika (utan att överskrida nvarchar(8))
    Vi behåller första, och för duplicates sätter vi:
-   LEFT(UserName,3) + sista 3 siffror från personnumret (ID) -> 6 tecken
+   LEFT(UserName,3) + sista 3 siffror från personnumret (ID) -> 8 tecken
    ========================= */
 ;WITH d AS
 (
@@ -190,7 +190,7 @@ GO
 /* =========================
    Uppgift 9
    Lägg till en ny användare i NewUsers
-   (välj ett UserName som är 6 tecken och inte krockar)
+   (välj ett UserName som är 8 tecken och inte krockar)
    ========================= */
 INSERT INTO dbo.NewUsers
 (
