@@ -142,9 +142,9 @@ GO
 
 /* =========================
    Uppgift 7
-   Gör alla UserName unika (utan att överskrida nvarchar(8))
+   Gör alla UserName unika (utan att överskrida nvarchar(6))
    Vi behåller första, och för duplicates sätter vi:
-   LEFT(UserName,3) + sista 3 siffror från personnumret (ID) -> 8 tecken
+   LEFT(UserName,3) + sista 3 siffror från personnumret (ID) -> 6 tecken
    ========================= */
 ;WITH d AS
 (
@@ -213,8 +213,8 @@ GO
 
 /* =========================
    Uppgift 9
-   Lägg till en ny användare i NewUsers
-   (välj ett UserName som är 8 tecken och inte krockar)
+   Lägg till en ny användare i tabellen ”NewUsers”.
+   GO
    ========================= */
 INSERT INTO dbo.NewUsers
 (
@@ -229,9 +229,9 @@ INSERT INTO dbo.NewUsers
 VALUES
 (
     '990101-1234',
-    'Kerols04',
+    'Ker234',              -- 6 tecken (passar nvarchar(6))
     'password',
-    'Kerols04@example.com',
+    'Ker234@example.com',
     '0700000000',
     'Kerols Abdalla',
     CASE
@@ -241,7 +241,6 @@ VALUES
 );
 
 GO
-
 
 
 /* =========================
