@@ -53,7 +53,7 @@ GO
 
 
 /* =========================
-   Uppgift 4 (VG)
+   Uppgift 4 
    Ta bort parentes + innehåll: "Pioneer 0 (Able I)" -> "Pioneer 0"
    ========================= */
 UPDATE dbo.SuccessfulMissions
@@ -67,43 +67,39 @@ SET [Spacecraft] =
 GO
 
 
-
 /* =========================
-   Uppgift 5
-   Ta ut samtliga rader och kolumner från Users,
-   slå ihop FirstName + LastName till Name,
-   och lägg till kolumn Gender
+   Uppgift 5 
+   Skapa NewUsers med Name + Gender
    ========================= */
 
 IF OBJECT_ID('dbo.NewUsers', 'U') IS NOT NULL
     DROP TABLE dbo.NewUsers;
 
--- 1. Kopiera ALLA kolumner och rader
 SELECT *
 INTO dbo.NewUsers
 FROM dbo.[Users];
 
 GO
 
--- 2. Lägg till kolumn Name
 ALTER TABLE dbo.NewUsers
-ADD [Name] nvarchar(200);
+ADD
+    [Name] nvarchar(200),
+    [Gender] nvarchar(10);
 
 GO
 
--- 3. Lägg till kolumn Gender
-ALTER TABLE dbo.NewUsers
-ADD [Gender] nvarchar(10);
-
-GO
-
--- 4. Sätt Name = FirstName + LastName
 UPDATE dbo.NewUsers
-SET [Name] = CONCAT([FirstName], ' ', [LastName]);
+SET [Name] =
+    LTRIM(RTRIM(
+        CONCAT(
+            ISNULL([FirstName], ''),
+            ' ',
+            ISNULL([LastName], '')
+        )
+    ));
 
 GO
 
--- 5. Beräkna Gender från näst sista siffran i personnumret
 UPDATE dbo.NewUsers
 SET [Gender] =
     CASE
@@ -121,6 +117,15 @@ SET [Gender] =
 
 GO
 
+/* =========================
+   Justering av UserName-längd
+   (krävs för uppgift 7 & 9)
+   ========================= */
+
+ALTER TABLE dbo.NewUsers
+ALTER COLUMN [UserName] nvarchar(8);
+
+GO
 
 
 
@@ -141,17 +146,19 @@ GO
 
 
 /* =========================
-   Uppgift 7
-   Gör alla UserName unika (utan att överskrida nvarchar(6))
-   Vi behåller första, och för duplicates sätter vi:
-   LEFT(UserName,3) + sista 3 siffror från personnumret (ID) -> 6 tecken
+   Uppgift 7 
+   Gör UserName unika
    ========================= */
+
 ;WITH d AS
 (
     SELECT
         nu.[ID],
         nu.[UserName],
-        ROW_NUMBER() OVER (PARTITION BY nu.[UserName] ORDER BY nu.[ID]) AS rn
+        ROW_NUMBER() OVER (
+            PARTITION BY nu.[UserName]
+            ORDER BY nu.[ID]
+        ) AS rn
     FROM dbo.NewUsers AS nu
 )
 UPDATE d
@@ -216,6 +223,7 @@ GO
    Lägg till en ny användare i tabellen ”NewUsers”.
    GO
    ========================= */
+
 INSERT INTO dbo.NewUsers
 (
     [ID],
@@ -229,13 +237,14 @@ INSERT INTO dbo.NewUsers
 VALUES
 (
     '990101-1234',
-    'Ker234',              -- 6 tecken (passar nvarchar(6))
+    'Kerols04',
     'password',
-    'Ker234@example.com',
+    'kerols04@example.com',
     '0700000000',
     'Kerols Abdalla',
     CASE
-        WHEN (TRY_CONVERT(int, SUBSTRING('9901011234', LEN('9901011234') - 1, 1)) % 2) = 0 THEN 'Female'
+        WHEN (TRY_CONVERT(int, SUBSTRING('9901011234', 10, 1)) % 2) = 0
+            THEN 'Female'
         ELSE 'Male'
     END
 );
@@ -244,8 +253,8 @@ GO
 
 
 /* =========================
-   Uppgift 10 (VG)
-   Returnera: gender + average age (2 rader)
+   Uppgift 10 
+   Returnera: gender + average age 
    ========================= */
 ;WITH p AS
 (
